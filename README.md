@@ -2,6 +2,8 @@
 
 **Live App:** [https://dailywheel.link](https://dailywheel.link)
 
+![Spin & Win Demo](demo.jpg)
+
 A client-side daily "Spin & Win" casino-arcade wheel game built with **React 19**, **TypeScript**, **Vite 6**, and **Tailwind CSS v4**.
 
 ## Features
