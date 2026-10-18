@@ -469,47 +469,30 @@ export const WheelStage: React.FC<WheelStageProps> = ({
                       </g>
                     )}
 
-                    {/* RADIAL SPOKE TEXT */}
+                    {/* RADIAL SPOKE TEXT — bold, centered, no subtitle clutter */}
                     <g transform={`translate(0, -132) rotate(${textRotation})`}>
                       <text
                         x="0"
-                        y={slice.sublabel ? '-2' : '5'}
+                        y="0"
+                        dominantBaseline="central"
                         textAnchor="middle"
                         fill={slice.textColor}
                         fontSize={
                           displayPrimaryText.length > 9
-                            ? '13.5'
+                            ? '15'
                             : displayPrimaryText.length > 6
-                            ? '15.5'
-                            : '18'
+                            ? '17.5'
+                            : '22'
                         }
                         fontWeight="900"
                         fontFamily="Outfit, sans-serif"
-                        letterSpacing="0.4"
+                        letterSpacing="0.5"
                         style={{
-                          filter: 'drop-shadow(0px 2px 3px rgba(0,0,0,0.75))',
+                          filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.8))',
                         }}
                       >
                         {displayPrimaryText}
                       </text>
-                      {slice.sublabel && (
-                        <text
-                          x="0"
-                          y="11"
-                          textAnchor="middle"
-                          fill={slice.accentColor}
-                          fontSize="7.5"
-                          fontWeight="800"
-                          letterSpacing="0.8"
-                          style={{
-                            filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.8))',
-                          }}
-                        >
-                          {slice.type === 'cash' && activeMultiplier > 1
-                            ? `★ ${activeMultiplier}X ${slice.sublabel} ★`
-                            : slice.sublabel}
-                        </text>
-                      )}
                     </g>
                   </g>
                 </g>
