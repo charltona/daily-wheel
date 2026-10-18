@@ -3,99 +3,85 @@ import { WinTier } from '../types/game';
 
 export function firePowerUpBurst(colorHex: string) {
   confetti({
-    particleCount: 32,
-    spread: 65,
+    particleCount: 14,
+    spread: 55,
     origin: { y: 0.55 },
     colors: [colorHex, '#ffffff', '#fbbf24'],
     scalar: 0.85,
-    ticks: 130,
+    ticks: 90,
+    disableForReducedMotion: true,
   });
 }
 
 export function fireWinConfetti(tier: WinTier) {
   if (tier === 'small') {
     confetti({
-      particleCount: 55,
-      spread: 70,
+      particleCount: 20,
+      spread: 60,
       origin: { y: 0.6 },
       colors: ['#38bdf8', '#818cf8', '#fbbf24', '#ffffff'],
+      ticks: 100,
+      disableForReducedMotion: true,
     });
     return;
   }
 
   if (tier === 'medium') {
     confetti({
-      particleCount: 95,
-      spread: 90,
+      particleCount: 30,
+      spread: 75,
       origin: { y: 0.55 },
       colors: ['#10b981', '#fbbf24', '#f472b6', '#38bdf8'],
-      scalar: 1.1,
+      ticks: 110,
+      disableForReducedMotion: true,
     });
     return;
   }
 
   if (tier === 'big') {
-    // Dual side cannons + center explosion
     confetti({
-      particleCount: 110,
-      spread: 100,
+      particleCount: 40,
+      spread: 85,
       origin: { y: 0.55 },
       colors: ['#fbbf24', '#ec4899', '#a855f7', '#34d399'],
-      scalar: 1.2,
+      ticks: 120,
+      disableForReducedMotion: true,
     });
-    setTimeout(() => {
-      confetti({
-        particleCount: 60,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.65 },
-        colors: ['#fbbf24', '#f43f5e', '#a855f7'],
-      });
-      confetti({
-        particleCount: 60,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.65 },
-        colors: ['#fbbf24', '#f43f5e', '#a855f7'],
-      });
-    }, 220);
     return;
   }
 
-  // JACKPOT — Continuous 2.6 second Golden & Neon Shower!
-  const end = Date.now() + 2600;
+  // JACKPOT — Lightweight 2-stage burst (mobile-friendly, no rAF particle flood)
   const colors = ['#fbbf24', '#fef08a', '#f59e0b', '#ec4899', '#a855f7', '#ffffff'];
 
-  // Immediate massive center burst
   confetti({
-    particleCount: 150,
-    spread: 120,
-    origin: { y: 0.5 },
+    particleCount: 45,
+    spread: 95,
+    origin: { y: 0.55 },
     colors,
-    scalar: 1.35,
+    scalar: 1.05,
+    ticks: 130,
+    disableForReducedMotion: true,
   });
 
-  const frame = () => {
+  setTimeout(() => {
     confetti({
-      particleCount: 6,
+      particleCount: 20,
       angle: 60,
-      spread: 55,
-      origin: { x: 0, y: 0.65 },
+      spread: 50,
+      origin: { x: 0.05, y: 0.65 },
       colors,
-      scalar: 1.15,
+      ticks: 120,
+      disableForReducedMotion: true,
     });
     confetti({
-      particleCount: 6,
+      particleCount: 20,
       angle: 120,
-      spread: 55,
-      origin: { x: 1, y: 0.65 },
+      spread: 50,
+      origin: { x: 0.95, y: 0.65 },
       colors,
-      scalar: 1.15,
+      ticks: 120,
+      disableForReducedMotion: true,
     });
-
-    if (Date.now() < end) {
-      requestAnimationFrame(frame);
-    }
-  };
-  frame();
+  }, 280);
 }
+
