@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    background-color: #090614;
+    color: #ffffff;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  15% { transform: translate(-8px, -6px) rotate(-1deg); }
+  30% { transform: translate(8px, 4px) rotate(1deg); }
+  45% { transform: translate(-6px, 6px) rotate(-0.5deg); }
+  60% { transform: translate(6px, -4px) rotate(0.5deg); }
+  75% { transform: translate(-4px, 2px) rotate(0deg); }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Phase 1: Slice unlatches and pops high up out of the board socket */
+@keyframes sliceLiftUp {
+  0% {
+    transform: translateY(0px) scale(1);
+  }
+  70% {
+    transform: translateY(-34px) scale(1.1);
+  }
+  100% {
+    transform: translateY(-28px) scale(1.08);
+  }
+}
+
+/* Phase 3: Slice slams down heavily into its new board socket with impact compression */
+@keyframes sliceSlamDown {
+  0% {
+    transform: translateY(-28px) scale(1.08);
+  }
+  55% {
+    transform: translateY(7px) scale(0.95);
+  }
+  78% {
+    transform: translateY(-3px) scale(1.02);
+  }
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+}
+
+/* Heavy board recoil as the 12 wedges thud into their sockets */
+@keyframes boardSlamTremor {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  12% { transform: translate(0, 4px) scale(0.99); }
+  25% { transform: translate(-3px, -2px) scale(1.005); }
+  38% { transform: translate(3px, 4px) scale(0.992); }
+  52% { transform: translate(-2px, 3px) scale(0.995); }
+  68% { transform: translate(2px, -2px) scale(1.003); }
+  84% { transform: translate(0, 2px) scale(0.997); }
+}
+
+/* Rotating marquee chase wave around the 24 outer bulbs while spinning */
+@keyframes marqueeChaseBulb {
+  0%, 100% {
+    opacity: 0.22;
+    transform: scale(0.75);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.55);
+  }
+  45% {
+    opacity: 0.65;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes marqueeChaseHalo {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  20% {
+    opacity: 0.95;
+    transform: scale(1.9);
+  }
+  45% {
+    opacity: 0.25;
+    transform: scale(1.1);
+  }
+}
+
+/* Single all-at-once flash when the wheel lands, then settles calmly */
+@keyframes marqueeLandedAllFlash {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.65);
+  }
+  100% {
+    opacity: 0.88;
+    transform: scale(1);
+  }
+}
+
+@keyframes marqueeLandedAllHalo {
+  0% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+  35% {
+    opacity: 0.95;
+    transform: scale(2.1);
+  }
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+}
+
+@keyframes spinRimSweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
