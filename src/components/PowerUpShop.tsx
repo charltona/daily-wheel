@@ -8,8 +8,7 @@ import { formatCash, formatCost } from '../utils/wheelMath';
 interface PowerUpShopProps {
   balance: number;
   inventory: Record<PowerUpId, number>;
-  respinPurchases: number;
-  doublePurchases: number;
+  dailyPurchases: Record<PowerUpId, number>;
   history: SpinHistoryEntry[];
   totalSpins: number;
   biggestWin: number;
@@ -22,8 +21,7 @@ interface PowerUpShopProps {
 export const PowerUpShop: React.FC<PowerUpShopProps> = ({
   balance,
   inventory,
-  respinPurchases,
-  doublePurchases,
+  dailyPurchases,
   history,
   totalSpins,
   biggestWin,
@@ -85,21 +83,29 @@ export const PowerUpShop: React.FC<PowerUpShopProps> = ({
       {activeTab === 'shop' ? (
         <div className="flex flex-col flex-1 p-3.5 sm:p-5 justify-between gap-4">
           <div>
-            <div className="mb-3 flex items-center justify-between">
-              <div>
-                <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white flex items-center gap-1.5">
-                  <Sparkles className="h-4 w-4 text-amber-400" />
-                  Rig The Wheel In Your Favor
-                </h3>
-                <p className="text-[11px] sm:text-xs text-slate-400">
-                  Stockpile tactical gadgets in local storage and deploy them on any spin.
-                </p>
+            <div className="mb-3">
+              <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white flex items-center gap-1.5">
+                <Sparkles className="h-4 w-4 text-amber-400" />
+                Rig The Wheel In Your Favor
+              </h3>
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5">
+                Stockpile tactical gadgets and deploy them on any spin.
+              </p>
+
+              {/* Daily 1.2x Price Scaling & Daily Reset Note */}
+              <div className="mt-2.5 rounded-xl border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-[11px] sm:text-xs text-amber-100 leading-snug">
+                <strong className="font-black text-amber-300">Note:</strong> Every purchase increases that power-up&apos;s price by{' '}
+                <strong className="font-black text-amber-300">1.2×</strong> for today.{' '}
+                <strong className="font-black text-emerald-300">
+                  All prices reset back to default each new day!
+                </strong>
               </div>
             </div>
 
             <div className="space-y-2.5">
               {POWER_UP_LIST.map((pu) => {
-                const currentCost = getPowerUpCost(pu.id, respinPurchases, doublePurchases);
+                const currentCost = getPowerUpCost(pu.id, dailyPurchases);
+                const boughtToday = dailyPurchases[pu.id] || 0;
                 const canAfford = balance >= currentCost;
                 const owned = inventory[pu.id] || 0;
                 const isBoughtAnim = justBoughtId === pu.id;
@@ -134,10 +140,9 @@ export const PowerUpShop: React.FC<PowerUpShopProps> = ({
                           <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-extrabold text-slate-300">
                             Owned: {owned}
                           </span>
-                          {(pu.id === 'respin' || pu.id === 'double') && (
+                          {boughtToday > 0 && (
                             <span className="rounded-md bg-pink-500/20 border border-pink-400/30 px-1.5 py-0.5 text-[9px] font-black text-pink-300">
-                              {pu.id === 'respin' ? '1.1×' : '1.25×'} Scale (Bought:{' '}
-                              {pu.id === 'respin' ? respinPurchases : doublePurchases})
+                              1.2× Today (Bought: {boughtToday})
                             </span>
                           )}
                         </div>
@@ -187,14 +192,12 @@ export const PowerUpShop: React.FC<PowerUpShopProps> = ({
           <div className="rounded-2xl border border-fuchsia-500/25 bg-gradient-to-r from-fuchsia-950/40 via-indigo-950/40 to-slate-900/40 p-3 text-xs text-slate-300">
             <div className="font-black text-fuchsia-300 uppercase tracking-wider text-[11px] mb-1 flex items-center gap-1.5">
               <Coins className="h-3.5 w-3.5 text-amber-400" />
-              Daily Random Board Strategy
+              Daily Random Board &amp; Price Reset
             </div>
             Every day generates a brand-new wheel with a randomized{' '}
-            <strong className="text-amber-300">$400–$750 Jackpot</strong>. Because{' '}
-            <strong className="text-pink-300">Respin</strong> increases in price by{' '}
-            <strong className="text-pink-300">1.1×</strong> each time you buy one, use{' '}
-            <strong className="text-amber-300">Nudge ±1</strong> and{' '}
-            <strong className="text-cyan-300">Invert 180°</strong> wisely!
+            <strong className="text-amber-300">$400–$750 Jackpot</strong>, and all power-up prices
+            reset back to their default base cost! Each purchase increases that item&apos;s cost by{' '}
+            <strong className="text-pink-300">1.2×</strong> until midnight.
           </div>
         </div>
       ) : (

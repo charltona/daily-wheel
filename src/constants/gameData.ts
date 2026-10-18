@@ -44,7 +44,7 @@ export const POWER_UPS: Record<PowerUpId, PowerUpDefinition> = {
     id: 'double',
     name: 'Double Value (2x)',
     shortName: 'Double 2x',
-    description: 'Doubles ALL cash values on the wheel for this spin (Max 2x per spin). Cost scales 1.25x per buy.',
+    description: 'Doubles ALL cash values on the wheel for this spin (Max 2x per spin).',
     tacticalHint: '2x cash (Max 1/spin)',
     cost: 250,
     icon: 'Zap',
@@ -70,7 +70,7 @@ export const POWER_UPS: Record<PowerUpId, PowerUpDefinition> = {
     id: 'respin',
     name: 'High-Roller Respin',
     shortName: 'Respin',
-    description: 'Spin the wheel again immediately! Cost increases by 1.1x each time you buy one.',
+    description: 'Spin the wheel again immediately! Keeps any active 2x multiplier.',
     tacticalHint: 'Full fresh spin',
     cost: 240,
     icon: 'RefreshCw',
@@ -90,23 +90,29 @@ export const POWER_UP_LIST: PowerUpDefinition[] = [
   POWER_UPS.respin,
 ];
 
+export const DAILY_PRICE_MULTIPLIER = 1.2;
+
+export const INITIAL_DAILY_PURCHASES: Record<PowerUpId, number> = {
+  nudge_forward: 0,
+  nudge_backward: 0,
+  invert: 0,
+  respin: 0,
+  shuffle: 0,
+  double: 0,
+};
+
 /**
- * Calculates the current shop price for a power-up.
- * Respin scales by 1.1x and Double 2x scales by 1.25x for every card previously purchased!
+ * Calculates the current shop price for any power-up.
+ * Every power-up increases in price by 1.2x for each time it was purchased today,
+ * and resets back to its base cost each new day!
  */
 export function getPowerUpCost(
   id: PowerUpId,
-  respinPurchases: number = 0,
-  doublePurchases: number = 0
+  dailyPurchases?: Partial<Record<PowerUpId, number>>
 ): number {
   const base = POWER_UPS[id].cost;
-  if (id === 'respin') {
-    return Math.round(base * Math.pow(1.1, respinPurchases));
-  }
-  if (id === 'double') {
-    return Math.round(base * Math.pow(1.25, doublePurchases));
-  }
-  return base;
+  const purchasesToday = dailyPurchases?.[id] || 0;
+  return Math.round(base * Math.pow(DAILY_PRICE_MULTIPLIER, purchasesToday));
 }
 
 export const INITIAL_WHEEL_SLICES: WheelSlice[] = [];
@@ -121,8 +127,8 @@ export const INITIAL_PLAYER_STATE = {
     shuffle: 1,
     double: 0,
   },
-  respinPurchases: 0,
-  doublePurchases: 0,
+  dailyPurchases: { ...INITIAL_DAILY_PURCHASES },
+  dailyPurchaseDate: null,
   lastSpinDate: null,
   simulatedDayOffset: 0,
   streak: 0,

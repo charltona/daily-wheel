@@ -55,8 +55,8 @@ export interface SpinHistoryEntry {
 export interface PlayerState {
   balance: number;
   inventory: Record<PowerUpId, number>;
-  respinPurchases: number;
-  doublePurchases?: number;
+  dailyPurchases: Record<PowerUpId, number>;
+  dailyPurchaseDate: string | null; // YYYY-MM-DD when dailyPurchases were made (resets each new day!)
   lastSpinDate: string | null; // YYYY-MM-DD in local time (or simulated date)
   simulatedDayOffset: number; // Allows players to test/advance days freely
   streak: number;

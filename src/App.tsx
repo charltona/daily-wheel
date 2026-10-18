@@ -9,6 +9,7 @@ import {
 } from './types/game';
 import {
   getPowerUpCost,
+  INITIAL_DAILY_PURCHASES,
   INITIAL_PLAYER_STATE,
   POWER_UPS,
 } from './constants/gameData';
@@ -53,7 +54,11 @@ export function App() {
         return {
           ...INITIAL_PLAYER_STATE,
           ...parsed,
-          respinPurchases: parsed.respinPurchases ?? 0,
+          dailyPurchases: {
+            ...INITIAL_DAILY_PURCHASES,
+            ...(parsed.dailyPurchases || {}),
+          },
+          dailyPurchaseDate: parsed.dailyPurchaseDate ?? null,
           inventory: {
             ...INITIAL_PLAYER_STATE.inventory,
             ...(parsed.inventory || {}),
@@ -78,6 +83,15 @@ export function App() {
   const effectiveToday = getEffectiveDateString(player.simulatedDayOffset);
   const dailyBoard = useMemo(() => generateDailyWheel(effectiveToday), [effectiveToday]);
 
+  // All power-up costs reset back to default each new calendar day!
+  const effectiveTodayPurchases = useMemo(
+    () =>
+      player.dailyPurchaseDate === effectiveToday
+        ? player.dailyPurchases
+        : INITIAL_DAILY_PURCHASES,
+    [player.dailyPurchaseDate, player.dailyPurchases, effectiveToday]
+  );
+
   // Wheel & Turn State
   const [slices, setSlices] = useState<WheelSlice[]>(() => dailyBoard.slices);
   const [rotation, setRotation] = useState<number>(0);
@@ -92,10 +106,21 @@ export function App() {
   const [lastClaimedBonus, setLastClaimedBonus] = useState<number>(0);
   const [mobileSection, setMobileSection] = useState<MobileSection>('wheel');
 
-  // Whenever the calendar day changes (or simulated day advances), load that day's fresh randomized wheel!
+  // Whenever the calendar day changes (or simulated day advances), load that day's fresh randomized wheel
+  // and reset daily shop purchase scaling back to default!
   useEffect(() => {
     setSlices(dailyBoard.slices);
-  }, [dailyBoard]);
+    setPlayer((prev) => {
+      if (prev.dailyPurchaseDate && prev.dailyPurchaseDate !== effectiveToday) {
+        return {
+          ...prev,
+          dailyPurchases: { ...INITIAL_DAILY_PURCHASES },
+          dailyPurchaseDate: effectiveToday,
+        };
+      }
+      return prev;
+    });
+  }, [dailyBoard, effectiveToday]);
 
   const rotationRef = useRef<number>(0);
   const animFrameRef = useRef<number | null>(null);
@@ -520,44 +545,35 @@ export function App() {
     setPowerUpsUsedThisTurn([]);
   };
 
-  // Buy a Power-Up from the shop or quick-buy slot (scales Respin and Double cost by 1.25x each buy)
+  // Buy a Power-Up from the shop or quick-buy slot (scales all power-ups by 1.2x per buy today, resets daily!)
   const handleBuyPowerUp = (id: PowerUpId) => {
     const def = POWER_UPS[id];
-    const currentCost = getPowerUpCost(
-      id,
-      player.respinPurchases || 0,
-      player.doublePurchases || 0
-    );
+    const currentCost = getPowerUpCost(id, effectiveTodayPurchases);
     if (player.balance < currentCost) return;
 
-    soundEngine.playPurchase();
-    setPlayer((prev) => {
-      const nextRespinPurchases =
-        id === 'respin' ? (prev.respinPurchases || 0) + 1 : prev.respinPurchases || 0;
-      const nextDoublePurchases =
-        id === 'double' ? (prev.doublePurchases || 0) + 1 : prev.doublePurchases || 0;
-      return {
-        ...prev,
-        balance: prev.balance - currentCost,
-        respinPurchases: nextRespinPurchases,
-        doublePurchases: nextDoublePurchases,
-        inventory: {
-          ...prev.inventory,
-          [id]: (prev.inventory[id] || 0) + 1,
-        },
-      };
-    });
+    const nextPurchasesForId = (effectiveTodayPurchases[id] || 0) + 1;
+    const nextDailyPurchases: Record<PowerUpId, number> = {
+      ...effectiveTodayPurchases,
+      [id]: nextPurchasesForId,
+    };
 
-    const nextCostText =
-      id === 'respin'
-        ? ` • Next Respin: ${formatCost(getPowerUpCost('respin', (player.respinPurchases || 0) + 1, player.doublePurchases || 0))}`
-        : id === 'double'
-        ? ` • Next Double: ${formatCost(getPowerUpCost('double', player.respinPurchases || 0, (player.doublePurchases || 0) + 1))}`
-        : '';
+    soundEngine.playPurchase();
+    setPlayer((prev) => ({
+      ...prev,
+      balance: prev.balance - currentCost,
+      dailyPurchases: nextDailyPurchases,
+      dailyPurchaseDate: effectiveToday,
+      inventory: {
+        ...prev.inventory,
+        [id]: (prev.inventory[id] || 0) + 1,
+      },
+    }));
+
+    const nextCost = getPowerUpCost(id, nextDailyPurchases);
 
     pushToast(
       `+1 ${def.shortName.toUpperCase()} (${formatCost(currentCost)})`,
-      `Deducted ${formatCost(currentCost)} from Vault${nextCostText}`,
+      `Deducted ${formatCost(currentCost)} • Next today: ${formatCost(nextCost)}`,
       '#f43f5e'
     );
   };
@@ -583,7 +599,7 @@ export function App() {
     );
   };
 
-  // Advance simulated day by +1 -> generates a brand-new daily wheel & unlocks today's spin!
+  // Advance simulated day by +1 -> generates a brand-new daily wheel, unlocks today's spin & resets shop prices!
   const handleAdvanceDay = () => {
     if (phase === 'SPINNING' || shuffleStage !== 'idle') return;
     soundEngine.playPowerUp('shuffle');
@@ -597,6 +613,8 @@ export function App() {
       setPlayer((prev) => ({
         ...prev,
         simulatedDayOffset: nextOffset,
+        dailyPurchases: { ...INITIAL_DAILY_PURCHASES },
+        dailyPurchaseDate: nextDateStr,
       }));
     }, 240);
     setTimeout(() => {
@@ -614,7 +632,7 @@ export function App() {
 
     pushToast(
       `🎲 NEW DAY: ${nextBoard.boardName.toUpperCase()}!`,
-      `Wheel randomized! Top Jackpot: ${formatCash(nextBoard.topJackpot)}`,
+      `Shop prices reset & wheel randomized! Jackpot: ${formatCash(nextBoard.topJackpot)}`,
       '#fbbf24'
     );
   };
@@ -635,8 +653,8 @@ export function App() {
     setPlayer((prev) => ({
       ...prev,
       balance: INITIAL_PLAYER_STATE.balance,
-      respinPurchases: 0,
-      doublePurchases: 0,
+      dailyPurchases: { ...INITIAL_DAILY_PURCHASES },
+      dailyPurchaseDate: effectiveToday,
       totalSpins: 0,
       biggestWin: 0,
       lifetimeEarnings: 0,
@@ -645,7 +663,7 @@ export function App() {
     setActiveMultiplier(1);
     pushToast(
       '💸 CASH & VAULT LOG RESET!',
-      'Balance reset to $220 and spin history cleared!',
+      'Balance reset to $220, shop prices reset, and history cleared!',
       '#fb7185'
     );
   };
@@ -754,8 +772,7 @@ export function App() {
               phase={phase}
               balance={player.balance}
               inventory={player.inventory}
-              respinPurchases={player.respinPurchases || 0}
-              doublePurchases={player.doublePurchases || 0}
+              dailyPurchases={effectiveTodayPurchases}
               slices={slices}
               activeSliceIndex={activeSliceIndex}
               activeMultiplier={activeMultiplier}
@@ -777,8 +794,7 @@ export function App() {
             <PowerUpShop
               balance={player.balance}
               inventory={player.inventory}
-              respinPurchases={player.respinPurchases || 0}
-              doublePurchases={player.doublePurchases || 0}
+              dailyPurchases={effectiveTodayPurchases}
               history={player.history}
               totalSpins={player.totalSpins}
               biggestWin={player.biggestWin}

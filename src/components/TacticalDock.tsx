@@ -17,8 +17,7 @@ interface TacticalDockProps {
   phase: GamePhase;
   balance: number;
   inventory: Record<PowerUpId, number>;
-  respinPurchases: number;
-  doublePurchases: number;
+  dailyPurchases: Record<PowerUpId, number>;
   slices: WheelSlice[];
   activeSliceIndex: number;
   activeMultiplier: number;
@@ -34,8 +33,7 @@ export const TacticalDock: React.FC<TacticalDockProps> = ({
   phase,
   balance,
   inventory,
-  respinPurchases,
-  doublePurchases,
+  dailyPurchases,
   slices,
   activeSliceIndex,
   activeMultiplier,
@@ -341,7 +339,7 @@ export const TacticalDock: React.FC<TacticalDockProps> = ({
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
         {POWER_UP_LIST.map((pu) => {
           const count = inventory[pu.id] || 0;
-          const currentCost = getPowerUpCost(pu.id, respinPurchases, doublePurchases);
+          const currentCost = getPowerUpCost(pu.id, dailyPurchases);
           const phaseReady = isPhaseCompatible(pu.id);
           const isDoubleMaxed = pu.id === 'double' && activeMultiplier >= 2;
           const usable = count > 0 && phaseReady;
