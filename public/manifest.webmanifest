@@ -1,0 +1,27 @@
+{
+  "id": "/",
+  "name": "Spin & Win — Daily Wheel",
+  "short_name": "Spin & Win",
+  "description": "Spin the daily prize wheel, deploy tactical power-ups, and grow your Cash Vault!",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#090614",
+  "theme_color": "#090614",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
