@@ -322,7 +322,7 @@ export const TacticalDock: React.FC<TacticalDockProps> = ({
                 ? 'Wheel spinning! Nudge, Invert & Respin will unlock as soon as it stops...'
                 : canSpinToday
                 ? 'Nudge & Invert unlock AFTER you spin. Double & Shuffle can be used now or after spinning!'
-                : 'Your daily spin is complete! Use a RESPIN card below (or Dev Reset Spin) to spin again.'}
+                : 'Your daily spin is complete! Use a RESPIN card below to spin again.'}
             </p>
           </div>
           {phase === 'IDLE' && canSpinToday && (
